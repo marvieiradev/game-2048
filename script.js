@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let board = [];
     let currentScore = 0;
     const currentScoreElement = document.getElementById('current-score');
-
+    console.log(currentScore)
     //Obtendo o Highscore do armazenamento local
 
     let highScore = localStorage.getItem('2048-highscore') || 0;
@@ -12,11 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     highScoreElement.textContent = highScore;
 
     const gameOverElement = document.getElementById('game-over');
-
+    //Função para atualizar a pontuação
     function updateScore(value) {
         currentScore += value;
         currentScoreElement.textContent = currentScore;
-
         if (currentScore > highScore) {
             highScore = currentScore;
             highScoreElement.textContent = highScore;
@@ -37,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeGame() {
         board = [...Array(size)].map(e => Array(size).fill(0));
-        placeRandon();
-        placeRandon();
+        placeRandom();
+        placeRandom();
         renderBoard();
     }
 
@@ -46,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderBoard() {
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
-                const cell = document.querySelector(`[data-row="$[i]"][data-col="$[j]"]`);
+                const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
 
                 const prevValue = cell.dataset.value;
-                const currentValue = borad[i][j];
+                const currentValue = board[i][j];
                 if (currentValue !== 0) {
                     cell.dataset.value = currentValue
                     cell.textContent = currentValue;
@@ -67,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         //Limpar classes da animação
         setTimeout(() => {
-            const colls = document.querySelectorAll('grid-cell');
-            colls.forEach(cell => {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => {
                 cell.classList.remove('merged-tile', 'new-tile');
 
             });
@@ -76,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     //Função para colocar um valor em uma celula aleatoria
-    function placeRandon() {
+    function placeRandom() {
         const avaliable = [];
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (avaliable.length > 0) {
             const randomCell = avaliable[Math.floor(Math.random() * avaliable.length)];
             board[randomCell.x][randomCell.y] = Math.random() < 0.9 ? 2 : 4;
-            const cell = document.querySelector(`[data-row="${randomCell.x}"][data-cell="${randomCell.y}"]`);
+            const cell = document.querySelector(`[data-row="${randomCell.x}"][data-col="${randomCell.y}"]`);
             //Animação para novos elementos
             cell.classList.add('new-tile');
         }
@@ -103,9 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const column = [...Array(size)].map((_, i) => board[i][j]);
                 const newColumn = transform(column, direction === 'ArrowUp');
                 for (let i = 0; i < size; i++) {
-                    if (board[i][j] != newColumn[i]) {
+                    if (board[i][j] !== newColumn[i]) {
                         hasChanged = true;
-                        board[i][j] = newColumn;
+                        board[i][j] = newColumn[i];
 
                     }
                 }
@@ -114,21 +113,21 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < size; i++) {
                 const row = board[i];
                 const newRow = transform(row, direction === 'ArrowLeft');
-                if (row.join(',') != newRow.join(',')) {
+                if (row.join(',') !== newRow.join(',')) {
                     hasChanged = true;
-                    board[i] = newRow
+                    board[i] = newRow;
                 }
             }
         }
 
         if (hasChanged) {
-            placeRandon();
+            placeRandom();
             renderBoard();
             checkGameOver();
         }
     }
 
-    //Função para ptransformar a linha (linha ou coluna) baseado na direção do movimento
+    //Função para transformar a linha (linha ou coluna) baseado na direção do movimento
 
     function transform(line, moveTowardsStart) {
         let newLine = line.filter(cell => cell !== 0);
@@ -139,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 0; i < newLine.length - 1; i++) {
             if (newLine[i] === newLine[i + 1]) {
-                newLine *= 2;
-                //Atualiza a pontuação qunado os quadrados são unidos
+                newLine[i] *= 2;
+                //Atualiza a pontuação quando os quadrados são unidos
                 updateScore(newLine[i]);
                 newLine.splice(i + 1, 1);
             }
@@ -180,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //Evests listeners
     document.addEventListener('keydown', event => {
-        if (['ArrowUp'], ['ArrowDown'], ['ArrowLeft'], ['ArrowRight'].includes(event.key)) {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
             move(event.key);
         }
     });
